@@ -20,8 +20,11 @@ function mocks (server) {
   server.filteringRequestBody(function (r) {
     if (r.match(/"_id":"org\.couchdb\.user:npm_oauth_auth_dummy_user"/)) {
       return 'auth'
+    } else {
+      return 'invalid'
     }
   })
+  server.post('/-/v1/login', 'invalid').reply(404, 'not found')
   server.put('/-/user/org.couchdb.user:npm_oauth_auth_dummy_user', 'auth')
     .reply(201, { token: 'foo', sso: ssoUri })
 }
@@ -30,7 +33,7 @@ test('setup', function (t) {
   mkdirp.sync(pkg)
   fs.writeFileSync(configfile, '')
   var s = '#!/usr/bin/env bash\n' +
-          'echo \"$@\" > ' + outfile + '\n'
+          'echo "$@" > ' + outfile + '\n'
   fs.writeFileSync(fakeBrowser, s, 'ascii')
   fs.chmodSync(fakeBrowser, '0755')
   t.pass('made script')
